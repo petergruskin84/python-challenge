@@ -1,47 +1,65 @@
-#type code here
-#used chatgpt for help
+#Got help from tutor and co-pilot
+#import the csv importer module from the python library
 import csv
 
-def read_csv_data(r'/Users/pete.home/Library/Mobile Documents/com~apple~CloudDocs/Data Analytics Bootcamp/3.X Python HW/python-challenge/PyBank/budget_data.csv):
-    data = []
-    with open(file_path, newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        next(reader)  # Skip the header row
-        for row in reader:
-            date = row[0]
-            profit_loss = int(row[1])
-            data.append((date, profit_loss))
-    return data
+#initialize 2 variables for the 2 columns of data we have, that are currently empty:
+months = []
+pl = []
+chg = []
+chg_mo = []
 
-def calculate_statistics(data):
-    months = len(data)
-    total_profit_losses = sum(profit_loss for , profit_loss in data)
-    changes = [profit_loss2 - profit_loss1 for (, profit_loss1), (_, profit_loss2) in zip(data, data[1:])]
-    average_change = sum(changes) / len(changes)
-    max_increase = max(changes)
-    max_decrease = min(changes)
+#name our csv_file dataset by the file name (not file path)
+csv_file = 'budget_data.csv'
 
-# Find corresponding dates for max increase and max decrease
-max_increase_date = data[changes.index(max_increase) + 1][0]
-max_decrease_date = data[changes.index(max_decrease) + 1][0]
 
-return {
-    "Total Months": months,
-    "Net Total Profit/Losses": total_profit_losses,
-    "Average Change": average_change,
-    "Greatest Increase in Profits": {"Date": max_increase_date, "Amount": max_increase},
-    "Greatest Decrease in Profits": {"Date": max_decrease_date, "Amount": max_decrease}
-}
+with open(csv_file, 'r') as csv_file:
+    csv_reader = csv.reader(csv_file)
 
-def main():
-    file_path = "path/to/your/file.csv"  # Replace with the actual path to your CSV file
-    data = read_csv_data(file_path)
-    result = calculate_statistics(data)
+    # Skip the header row
+    header = next(csv_reader)
 
-# Print the results
-for key, value in result.items():
-    print(f"{key}: {value}")
+    # Iterate through each row in the CSV file
+    for row in csv_reader:
+        months.append(row[0])
+        pl.append(int(row[1]))
+        if len(months) > 1:
+            chg_in_p = int(row[1]) - prev_mo_pl
+            chg.append(chg_in_p)
+            chg_mo.append(row[0])
+        prev_mo_pl = int(row[1])
 
-if name == "main":
-    main()
-    
+#The total number of months included in the dataset
+total_months = len(months)
+print(total_months)
+
+#The net total amount of "Profit/Losses" over the entire period
+total_net_pl = sum(pl)
+print(total_net_pl)
+
+#The changes in "Profit/Losses" over the entire period, and then the average of those changes (should be $-8311.11)
+avg_chg = sum(chg) / len(chg)
+print(avg_chg)
+
+#The greatest increase in profits (date and amount) over the entire period (should be Aug-16 ($1862002))
+max_chg = max(chg)
+print(max_chg)
+idx = chg.index(max_chg)
+max_chg_mo = chg_mo[idx]
+print(max_chg_mo)
+
+#The greatest decrease in profits (date and amount) over the entire period (should be Feb-14 ($-1825558))
+min_chg = min(chg)
+print(min_chg)
+idx = chg.index(min_chg)
+min_chg_mo = chg_mo[idx]
+print(min_chg_mo)
+
+export_file = open("output.txt", "w")
+export_file.write("Financial Analysis\n")
+export_file.write("----------------------------\n")
+export_file.write(f"Total Months: {total_months}\n")
+export_file.write(f"Total: ${total_net_pl}\n")
+export_file.write(f"Average Change: ${avg_chg}\n")
+export_file.write(f"Greatest Increase in Profits: {max_chg_mo} (${max_chg})\n")
+export_file.write(f"Greatest Decrease in Profits: {min_chg_mo} (${min_chg})\n")
+export_file.close()
